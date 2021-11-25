@@ -97,3 +97,4 @@ if __name__ == "__main__":
         draw.rect(screen, Color("white"), Rect(player.x, player.y + player.z, player.width, player.height))
         pygame.display.flip()
         clock.tick(FPS)
+    pygame.quit()
