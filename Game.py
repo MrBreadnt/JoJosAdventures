@@ -1,6 +1,7 @@
 import pygame, os
 from pygame import Color, Rect, draw, Surface
 from config import *
+from AnimationManager import Animation
 
 bricks = pygame.transform.scale(pygame.image.load("res/test_bricks.jpg"), (40, 40))
 bricks2 = pygame.transform.scale(pygame.image.load("res/test_bricks2.jpg"), (40, 40))
@@ -70,7 +71,7 @@ class Game:
                          Rect(0, 0, self.player.width-15,
                               self.player.width / 2))
             self.screen.blit(t, (self.player.x+(-5 if flip else 15), self.player.y + self.player.width - 20))
-            self.screen.blit(pygame.transform.flip(pers, flip, False), (self.player.x, self.player.y + self.player.z))
+            self.screen.blit(pygame.transform.flip(self.player.anim.get_current_frame(self.clock.get_time()), flip, False), (self.player.x, self.player.y + self.player.z))
             # draw.rect(self.screen, Color("white"),
             #         Rect(self.player.x, self.player.y + self.player.z, self.player.width, self.player.height))
             pygame.display.flip()

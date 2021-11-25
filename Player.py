@@ -1,3 +1,7 @@
+from AnimationManager import Animation
+import pygame
+
+
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -6,6 +10,10 @@ class Player:
         self.d = 0
         self.speed = 200
         self.width, self.height = 80, 80
+        self.anim = Animation([pygame.transform.scale(pygame.image.load("res/pers_walk_1.png"), (80, 80)),
+                                      pygame.transform.scale(pygame.image.load("res/pers_walk_2.png"), (80, 80)),
+                                      pygame.transform.scale(pygame.image.load("res/pers_walk_3.png"), (80, 80)),
+                                      pygame.transform.scale(pygame.image.load("res/pers_walk_2.png"), (80, 80))], 200)
 
     def move(self, r, l, u, d, k):
         if self.z < 0:
