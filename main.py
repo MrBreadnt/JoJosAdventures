@@ -6,6 +6,7 @@ WIN_WIDTH = 720
 WIN_HEIGHT = 480
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004400"
+FPS = 60
 
 
 class Player:
@@ -17,26 +18,29 @@ class Player:
         self.speed = 0.2
         self.width, self.height = 50, 80
 
-    def move(self, r, l, u, d):
+    def move(self, r, l, u, d, k):
         if self.z < 0:
-            self.z -= self.d
-            self.d -= 0.003
+            self.z -= self.d * k
+            if self.z >= 0:
+                self.z = 0
+            self.d -= 0.003 * k
         else:
             self.z = 0
-        if 200 < self.y + u * self.speed + self.height < 400:
+        if 225 < self.y + u * self.speed * k + self.height < 375:
             if u != 0:
-                self.y += u * self.speed
+                self.y += u * self.speed * k
             else:
-                self.y += d * self.speed
+                self.y += d * self.speed * k
         if r != 0:
-            self.x += r * self.speed
+            self.x += r * self.speed * k
         else:
-            self.x += l * self.speed
+            self.x += l * self.speed * k
 
-    def jump(self):
+    def jump(self, d):
         if self.z == 0:
-            self.d = 1
+            self.d = d
             self.z -= 0.00001
+
 
 if __name__ == "__main__":
     pygame.init()
@@ -61,7 +65,7 @@ if __name__ == "__main__":
                 elif e.key == pygame.K_s:
                     down = 1
                 if e.key == pygame.K_SPACE:
-                    player.jump()
+                    player.jump(1)
 
             if e.type == pygame.KEYUP:
                 if e.key == pygame.K_d:
@@ -76,22 +80,20 @@ if __name__ == "__main__":
             elif e.type == pygame.QUIT:
                 is_going = False
 
-        player.move(right, left, up, down)
+        player.move(right, left, up, down, FPS * 0.5)
         screen.fill(Color(BACKGROUND_COLOR))
         draw.rect(screen, Color("gray"), Rect(0, 200, WIN_WIDTH, 200))
-        '''x = y = 0
-        for i in map:
-            for j in i:
-                if j == '1':
-                    pf = Surface((20, 20))
-                    pf.fill(Color(Color("red")))
-                    screen.blit(pf, (y, x))
-            x += 20
-        y += 20
-        x = 0'''
-        draw.rect(screen, Color("black"), Rect(player.x, player.y+player.width, player.width, player.width))
+        # x = y = 0
+        # for i in map:
+        #     for j in i:
+        #         if j == '1':
+        #             pf = Surface((20, 20))
+        #             pf.fill(Color(Color("red")))
+        #             screen.blit(pf, (y, x))
+        #     x += 20
+        # y += 20
+        # x = 0
+        draw.rect(screen, Color("black"), Rect(player.x, player.y + player.width + 20, player.width, player.width / 2))
         draw.rect(screen, Color("white"), Rect(player.x, player.y + player.z, player.width, player.height))
-        pygame.display.update()
-        #clock.tick(1000)
-        #print(clock.get_fps())
-
+        pygame.display.flip()
+        clock.tick(FPS)
