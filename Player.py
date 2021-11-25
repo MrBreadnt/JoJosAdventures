@@ -5,7 +5,7 @@ class Player:
         self.z = 0
         self.d = 0
         self.speed = 200
-        self.width, self.height = 50, 80
+        self.width, self.height = 80, 80
 
     def move(self, r, l, u, d, k):
         if self.z < 0:
