@@ -1,9 +1,10 @@
-import pygame, os
+import pygame
+from HamonEffect import HamonEffect
 from pygame import Color, Rect, draw, Surface
 from config import *
 from AnimationManager import Animation
 
-bricks = pygame.transform.scale(pygame.image.load("res/test_bricks.jpg"), (40, 40))
+bricks = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("res/test_bricks.jpg"), (40, 40)), 90)
 bricks2 = pygame.transform.scale(pygame.image.load("res/test_bricks2.jpg"), (40, 40))
 bricks3 = pygame.transform.scale(pygame.image.load("res/test_bricks3.jpg"), (40, 40))
 pers = pygame.transform.scale(pygame.image.load("res/pers.png"), (80, 80))
@@ -16,11 +17,12 @@ class Game:
         self.clock = clock
 
     def start(self):
-        map = [str('1' * 18) if 5 <= i <= 9 else str('0' * 18) if 10 <= i else str('0' * 18) for i in range(12)]
-        map[3] = "0000200002000020000"
+        world_map = [str('1' * 18) if 5 <= i <= 9 else str('0' * 18) if 10 <= i else str('0' * 18) for i in range(12)]
+        world_map[3] = "0000200002000020000"
 
         up, down, left, right, flip = 0, 0, 0, 0, False
         is_going = True
+        light = HamonEffect(0, 0, 0, 0)
         while is_going:
             for e in pygame.event.get():
                 if e.type == pygame.KEYDOWN:
@@ -35,7 +37,7 @@ class Game:
                     elif e.key == pygame.K_s:
                         down = 1
                     if e.key == pygame.K_SPACE:
-                        self.player.jump(1000)
+                        self.player.jump(700)
 
                 if e.type == pygame.KEYUP:
                     if e.key == pygame.K_d:
@@ -47,13 +49,18 @@ class Game:
                     if e.key == pygame.K_s:
                         down = 0
 
+                if e.type == pygame.MOUSEBUTTONDOWN:
+                    light = HamonEffect(130, 50, 4, 42)
+                elif e.type == pygame.MOUSEBUTTONUP:
+                    light = HamonEffect(0, 0, 0, 0)
+
                 elif e.type == pygame.QUIT:
                     is_going = False
 
             self.player.move(right, left, up, down, 1 / FPS)
             self.screen.fill(Color("#004400"))
             x = y = 0
-            for i in map:
+            for i in world_map:
                 for j in i:
                     pf = Surface((40, 40))
                     if j == '1':
@@ -66,15 +73,23 @@ class Game:
                     x += 40
                 y += 40
                 x = 0
-            t = Surface((self.player.width-15, self.player.width / 2), pygame.SRCALPHA)
+            t = Surface((self.player.width - 15, self.player.width / 2), pygame.SRCALPHA)
             draw.ellipse(t, Color(0, 0, 0, 150),
-                         Rect(0, 0, self.player.width-15,
+                         Rect(0, 0, self.player.width - 15,
                               self.player.width / 2))
-            self.screen.blit(t, (self.player.x+(-5 if flip else 15), self.player.y + self.player.width - 20))
-            self.screen.blit(pygame.transform.flip(self.player.anim.get_current_frame(self.clock.get_time()), flip, False), (self.player.x, self.player.y + self.player.z))
+            self.screen.blit(t, (self.player.x + (-5 if flip else 15), self.player.y + self.player.width - 20))
+            self.screen.blit(
+                pygame.transform.flip(self.player.anim.get_current_frame(self.clock.get_time()), flip, False),
+                (self.player.x, self.player.y + self.player.z))
             # draw.rect(self.screen, Color("white"),
             #         Rect(self.player.x, self.player.y + self.player.z, self.player.width, self.player.height))
+            for lm in light.get_effect():
+                draw.lines(self.screen, light.color, False,
+                           list(map(lambda m: (
+                               self.player.x + m[0] * (-1 if flip else 1) + (40 if flip else 40),
+                               self.player.y + self.player.z + m[1] + 30), lm)),
+                           width=1)
             pygame.display.flip()
             self.clock.tick(FPS)
 
-    pygame.quit()
+        pygame.quit()
