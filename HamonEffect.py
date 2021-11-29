@@ -13,8 +13,8 @@ class HamonEffect:
         a = []
         for _ in range(self.count):
             light = []
-            k = uniform(-5,5)
-            verts = randint(self.verts//2, self.verts)
+            k = uniform(-5, 5)
+            verts = randint(self.verts // 2, self.verts)
             for i in range(verts):
                 light.append((i * self.width / self.verts, k))
                 k += uniform(-3, 3)

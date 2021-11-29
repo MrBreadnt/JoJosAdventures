@@ -8,6 +8,8 @@ bricks = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("res/t
 bricks2 = pygame.transform.scale(pygame.image.load("res/test_bricks2.jpg"), (40, 40))
 bricks3 = pygame.transform.scale(pygame.image.load("res/test_bricks3.jpg"), (40, 40))
 pers = pygame.transform.scale(pygame.image.load("res/pers.png"), (80, 80))
+bar_empty = pygame.image.load("res/bar_0.png")
+bar_full = pygame.image.load("res/bar_1.png")
 
 
 class Game:
@@ -17,12 +19,16 @@ class Game:
         self.clock = clock
 
     def start(self):
+        breath = 100
+
         world_map = [str('1' * 18) if 5 <= i <= 9 else str('0' * 18) if 10 <= i else str('0' * 18) for i in range(12)]
         world_map[3] = "0000200002000020000"
 
+        attacking = False
         up, down, left, right, flip = 0, 0, 0, 0, False
         is_going = True
         light = HamonEffect(0, 0, 0, 0)
+        light2 = HamonEffect(0,0,0,0)#300, 50, 1, 70)
         while is_going:
             for e in pygame.event.get():
                 if e.type == pygame.KEYDOWN:
@@ -50,12 +56,25 @@ class Game:
                         down = 0
 
                 if e.type == pygame.MOUSEBUTTONDOWN:
-                    light = HamonEffect(130, 50, 4, 42)
+                    light = HamonEffect(100, 50, 4, 42)
+                    attacking = True
+
                 elif e.type == pygame.MOUSEBUTTONUP:
                     light = HamonEffect(0, 0, 0, 0)
+                    attacking = False
 
                 elif e.type == pygame.QUIT:
                     is_going = False
+
+            if attacking:
+                breath -= 20 / FPS
+                if breath <= 0:
+                    breath = 0
+                    attacking = False
+                    light = HamonEffect(0, 0, 0, 0)
+            else:
+                breath += 10 / FPS
+                if breath > 100: breath = 100
 
             self.player.move(right, left, up, down, 1 / FPS)
             self.screen.fill(Color("#004400"))
@@ -89,6 +108,12 @@ class Game:
                                self.player.x + m[0] * (-1 if flip else 1) + (40 if flip else 40),
                                self.player.y + self.player.z + m[1] + 30), lm)),
                            width=1)
+            for lm in light2.get_effect():
+                draw.lines(self.screen, light.color, False, list(map(lambda x: (x[1]+ 250, x[0]), lm)), width=1)
+            self.screen.blit(bar_empty, (20, 20))
+            t = Surface((breath, 40))
+            t.blit(bar_full, (0, 0))
+            self.screen.blit(t, (20, 20))
             pygame.display.flip()
             self.clock.tick(FPS)
 
