@@ -3,6 +3,8 @@ from HamonEffect import HamonEffect
 from pygame import Color, Rect, draw, Surface
 from config import *
 from AnimationManager import Animation
+from Entity import Entity
+from Player import ANIM
 
 bricks = pygame.transform.rotate(pygame.transform.scale(pygame.image.load("res/test_bricks.jpg"), (40, 40)), 90)
 bricks2 = pygame.transform.scale(pygame.image.load("res/test_bricks2.jpg"), (40, 40))
@@ -21,6 +23,8 @@ class Game:
     def start(self):
         breath = 100
 
+        entitys = [Entity(490, 290, ANIM)]
+
         world_map = [str('1' * 18) if 5 <= i <= 9 else str('0' * 18) if 10 <= i else str('0' * 18) for i in range(12)]
         world_map[3] = "0000200002000020000"
 
@@ -28,7 +32,7 @@ class Game:
         up, down, left, right, flip = 0, 0, 0, 0, False
         is_going = True
         light = HamonEffect(0, 0, 0, 0)
-        light2 = HamonEffect(0,0,0,0)#300, 50, 1, 70)
+        light2 = HamonEffect(300, 50, 10000, 70)
         while is_going:
             for e in pygame.event.get():
                 if e.type == pygame.KEYDOWN:
@@ -38,6 +42,10 @@ class Game:
                     elif e.key == pygame.K_a:
                         left = -1
                         flip = True
+                    if e.key == pygame.K_q:
+                        light2 = HamonEffect(300, 50, light2.count - 1, 70)
+                    elif e.key == pygame.K_e:
+                        light2 = HamonEffect(300, 50, light2.count + 1, 70)
                     if e.key == pygame.K_w:
                         up = -1
                     elif e.key == pygame.K_s:
@@ -56,8 +64,9 @@ class Game:
                         down = 0
 
                 if e.type == pygame.MOUSEBUTTONDOWN:
-                    light = HamonEffect(100, 50, 4, 42)
-                    attacking = True
+                    if breath >= 30:
+                        light = HamonEffect(100, 50, 4, 42)
+                        attacking = True
 
                 elif e.type == pygame.MOUSEBUTTONUP:
                     light = HamonEffect(0, 0, 0, 0)
@@ -76,7 +85,7 @@ class Game:
                 breath += 10 / FPS
                 if breath > 100: breath = 100
 
-            self.player.move(right, left, up, down, 1 / FPS)
+            self.player.move(right, left, up, down, 1 / FPS, (None, (225, 375)))
             self.screen.fill(Color("#004400"))
             x = y = 0
             for i in world_map:
@@ -97,11 +106,15 @@ class Game:
                          Rect(0, 0, self.player.width - 15,
                               self.player.width / 2))
             self.screen.blit(t, (self.player.x + (-5 if flip else 15), self.player.y + self.player.width - 20))
-            self.screen.blit(
-                pygame.transform.flip(self.player.anim.get_current_frame(self.clock.get_time()), flip, False),
-                (self.player.x, self.player.y + self.player.z))
-            # draw.rect(self.screen, Color("white"),
-            #         Rect(self.player.x, self.player.y + self.player.z, self.player.width, self.player.height))
+
+            for entity in sorted((entitys + [self.player]), key=lambda x: x.y):
+                if entity == self.player:
+                    self.screen.blit(
+                        pygame.transform.flip(self.player.anim.get_current_frame(self.clock.get_time()), flip, False),
+                        (self.player.x, self.player.y + self.player.z))
+                else:
+                    self.screen.blit(entity.anim.get_current_frame(self.clock.get_time()),
+                                     (entity.x, entity.y + entity.z))
             for lm in light.get_effect():
                 draw.lines(self.screen, light.color, False,
                            list(map(lambda m: (
@@ -109,7 +122,7 @@ class Game:
                                self.player.y + self.player.z + m[1] + 30), lm)),
                            width=1)
             for lm in light2.get_effect():
-                draw.lines(self.screen, light.color, False, list(map(lambda x: (x[1]+ 250, x[0]), lm)), width=1)
+                draw.lines(self.screen, light.color, False, list(map(lambda x: (x[1] + 250, x[0]), lm)), width=1)
             self.screen.blit(bar_empty, (20, 20))
             t = Surface((breath, 40))
             t.blit(bar_full, (0, 0))
