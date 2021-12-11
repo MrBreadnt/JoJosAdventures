@@ -11,5 +11,5 @@ ANIM = {0: Animation([pygame.transform.scale(pygame.image.load("res/pers.png"), 
 
 
 class Player(Entity):
-    def __init__(self, x, y):
-        super().__init__(x, y, ANIM)
+    def __init__(self, x, y, *group):
+        super().__init__(x, y, ANIM, *group)

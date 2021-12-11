@@ -8,6 +8,5 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(DISPLAY)
     pygame.display.set_caption("JoJo's bizarre adventures")
-    player = Player(50, 250)
-    game = Game(screen, player, clock)
+    game = Game(screen, clock)
     game.start()
