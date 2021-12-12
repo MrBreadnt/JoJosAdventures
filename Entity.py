@@ -1,5 +1,6 @@
 from AnimationManager import Animation
 import pygame
+from config import *
 
 
 class Entity(pygame.sprite.Sprite):
@@ -17,26 +18,29 @@ class Entity(pygame.sprite.Sprite):
         self.image = self.anim.get_current_frame(0)
         self.flip = False
 
-    def move(self, r, l, u, d, k, rect):
-        if not rect[1] or rect[1][0] < self.y + u * self.speed * k + self.height < rect[1][1]:
+    def move(self, r, l, u, d, rect):
+        if not rect[1] or rect[1][0] < self.y + u * self.speed * 1 / FPS + self.height < rect[1][1]:
             if u != 0:
-                self.y += u * self.speed * k
+                self.y += u * self.speed * 1 / FPS
             else:
-                self.y += d * self.speed * k
+                self.y += d * self.speed * 1 / FPS
+            if 1 in self.data_anim.keys():
                 self.anim = self.data_anim[1]
         if r != 0:
-            self.x += r * self.speed * k
+            self.x += r * self.speed * 1 / FPS
+            if 1 in self.data_anim.keys():
+                self.anim = self.data_anim[1]
         else:
-            self.x += l * self.speed * k
-            self.anim = self.data_anim[1]
+            self.x += l * self.speed * 1 / FPS
         if r == l == u == d:
             self.anim = self.data_anim[0]
         if self.z < 0:
-            self.z -= self.d * k
+            self.z -= self.d * 1 / FPS
             if self.z >= 0:
                 self.z = 0
-            self.d -= 3000 * k
-            self.anim = self.data_anim[2]
+            self.d -= 3000 * 1 / FPS
+            if 2 in self.data_anim.keys():
+                self.anim = self.data_anim[2]
         else:
             self.z = 0
 
@@ -46,8 +50,8 @@ class Entity(pygame.sprite.Sprite):
             self.z -= 0.00001
 
     def update(self, *args, **kwargs):
+        self.rect = pygame.Rect(self.x, self.y + self.z, self.width, self.height)
         if self.flip:
             self.image = pygame.transform.flip(self.anim.get_current_frame(args[0]), self.flip, False)
         else:
             self.image = self.anim.get_current_frame(args[0])
-        self.rect = pygame.Rect(self.x, self.y + self.z, 80, 80)
