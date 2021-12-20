@@ -9,4 +9,10 @@ class Camera:
         obj.rect.x += self.dx
 
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - WIN_WIDTH // 2)
+        if target.rect.x > WIN_WIDTH - 200:
+            self.dx = -1
+        elif target.rect.x < 200:
+            if target.x > 200:
+                self.dx = 1
+        else:
+            self.dx = 0

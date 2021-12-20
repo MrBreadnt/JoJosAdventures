@@ -17,11 +17,12 @@ class Enemy(Entity):
     def update(self, *args, **kwargs):
         if len(args) > 1:
             length = sqrt((args[1].x - self.x) ** 2 + (args[1].y - self.y) ** 2)
-            if length >= 80:
-                self.move(0, -(self.x - args[1].x) / length, 0, -(self.y - args[1].y) / length, (None, (225, 375)))
-            # self.x -= (self.x - args[1].x) / length * self.speed * 1/FPS
-            # self.y -= (self.y - args[1].y) / length * self.speed * 1/FPS
-            elif 0 < length <= 65:
-                self.move((self.x - args[1].x) / length, 0, 0, 0, (None, (225, 375)))
+            a = args[2].copy()
+            a.remove(self)
+            if not pygame.sprite.spritecollideany(self, a):
+                if length >= 80:
+                    self.move(0, -(self.x - args[1].x) / length, 0, -(self.y - args[1].y) / length, (None, (225, 375)))
+                elif 0 < length <= 65:
+                    self.move((self.x - args[1].x) / length, 0, 0, 0, (None, (225, 375)))
             self.flip = args[1].rect[0] < self.rect[0]
             super().update(*args, **kwargs)

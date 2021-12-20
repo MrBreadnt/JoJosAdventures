@@ -27,10 +27,10 @@ class Game:
     def start(self):
         camera = Camera()
         breath = 100
-        _ = [Enemy(490, 290, self.entity), Enemy(320, 200, self.entity), Enemy(230, 250, self.entity)]
+        enemy = [Enemy(490, 290, self.entity), Enemy(320, 200, self.entity), Enemy(230, 250, self.entity)]
         map_sprite = pygame.sprite.Group()
         world_map = [str('1' * 36) if 5 <= i <= 9 else str('0' * 36) if 10 <= i else str('0' * 36) for i in range(12)]
-        world_map[3] = str(["0" if i % 1 != 0 else "2" for i in range(36)])
+        world_map[3] = str([("0" if i % 1 != 0 else "2") for i in range(36)])
 
         x = y = 0
         for i in world_map:
@@ -88,8 +88,8 @@ class Game:
             #         x += 40
             #     y += 40
             #     x = 0
-            self.entity.update(self.clock.get_time(), self.player)
-            camera.update(self.player)
+            self.entity.update(self.clock.get_time(), self.player, enemy)
+            #camera.update(self.player)
             for i in self.entity:
                 camera.apply(i)
             for i in map_sprite:
