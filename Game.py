@@ -25,12 +25,14 @@ class Game:
     def __init__(self, screen, clock):
         self.entity = EntityGroup()
         self.player = Player(50, 250, self.entity)
+        self.levels = [[(490, 290), (320, 200), (230, 250)],
+                       [(400, 290), (320, 300), (430, 210)],
+                       [(490, 290), (320, 200), (230, 250), (430, 210)]]
         self.screen = screen
         self.clock = clock
 
-    def start(self):
-        camera = Camera()
-        enemy = [Enemy(490, 290, self.entity), Enemy(320, 200, self.entity), Enemy(230, 250, self.entity)]
+    def start(self, level_index, score_0):
+        enemy = [Enemy(i[0], i[1], self.entity) for i in self.levels[level_index]]
         score = sum(map(lambda it: it.lives, self.entity.sprites()))
         map_sprite = pygame.sprite.Group()
         world_map = [str('1' * 36) if 5 <= i <= 9 else str('0' * 36) if 10 <= i else str('0' * 36) for i in range(12)]
@@ -93,10 +95,12 @@ class Game:
             self.screen.fill(Color(0, 0, 0))
             self.screen.blit(sc, (WIN_WIDTH / 2 - sc.get_width() / 2, WIN_HEIGHT / 2 - sc.get_height() / 2))
             if self.player.lives <= 0:
-                return score + self.player.lives - sum(
-                    map(lambda it: it.lives, self.entity.sprites())) - 100 + self.player.lives
+                return score_0
             if len(self.entity.sprites()) == 1:
+                s = 0
+                if len(self.levels) - 1 > level_index:
+                    s = self.start(level_index + 1, score - 100 + self.player.lives)
                 return score + self.player.lives - sum(
-                    map(lambda it: it.lives, self.entity.sprites())) - 100 + self.player.lives
+                    map(lambda it: it.lives, self.entity.sprites())) - 100 + self.player.lives + s
             pygame.display.flip()
             self.clock.tick(FPS)

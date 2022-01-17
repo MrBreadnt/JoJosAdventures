@@ -17,11 +17,11 @@ if __name__ == "__main__":
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(DISPLAY)
     pygame.display.set_caption("JoJo's bizarre adventures")
-    intro(screen, clock)
+    #intro(screen, clock)
     is_running = True
     while is_running:
         pygame.mixer.music.play()
         menu(screen, clock)
         game = Game(screen, clock)
-        outro(screen, clock, game.start())
+        outro(screen, clock, game.start(0, 0))
     pygame.quit()
