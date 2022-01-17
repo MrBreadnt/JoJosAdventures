@@ -9,6 +9,8 @@ class Entity(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.z = 0
+        self.lives = 100
+        self.attack = 0.1
         self.d = 0
         self.speed = 200
         self.rect = pygame.Rect(x, y, 80, 80)

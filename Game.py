@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 from Camera import Camera
@@ -15,6 +17,8 @@ from Player import Player
 pers = pygame.transform.scale(pygame.image.load("res/pers.png"), (80, 80))
 bar_empty = pygame.image.load("res/bar_0.png")
 bar_full = pygame.image.load("res/bar_1.png")
+health = pygame.transform.scale(pygame.image.load("res/health.png"), (
+    0.25 * pygame.image.load("res/health.png").get_width(), 0.2 * pygame.image.load("res/health.png").get_height()))
 
 
 class Game:
@@ -26,8 +30,8 @@ class Game:
 
     def start(self):
         camera = Camera()
-        breath = 100
         enemy = [Enemy(490, 290, self.entity), Enemy(320, 200, self.entity), Enemy(230, 250, self.entity)]
+        score = sum(map(lambda it: it.lives, self.entity.sprites()))
         map_sprite = pygame.sprite.Group()
         world_map = [str('1' * 36) if 5 <= i <= 9 else str('0' * 36) if 10 <= i else str('0' * 36) for i in range(12)]
         world_map[3] = str([("0" if i % 1 != 0 else "2") for i in range(36)])
@@ -45,69 +49,54 @@ class Game:
             y += 40
             x = 0
 
-        attacking = False
         is_going = True
-        light = HamonEffect(0, 0, 0, 0)
+        light = HamonEffect(100, 50, 4, 42)
         while is_going:
             for e in pygame.event.get():
-                if e.type == pygame.MOUSEBUTTONDOWN:
-                    if breath >= 30:
-                        light = HamonEffect(100, 50, 4, 42)
-                        attacking = True
-
-                elif e.type == pygame.MOUSEBUTTONUP:
-                    light = HamonEffect(0, 0, 0, 0)
-                    attacking = False
 
                 if e.type == pygame.QUIT:
-                    is_going = False
+                    pygame.quit()
+                    sys.exit()
 
-            if attacking:
-                breath -= 20 / FPS
-                if breath <= 0:
-                    breath = 0
-                    attacking = False
+            if self.player.attacking:
+                self.player.breath -= 20 / FPS
+                if self.player.breath <= 0:
+                    self.player.breath = 0
+                    self.player.attacking = False
                     light = HamonEffect(0, 0, 0, 0)
             else:
-                breath += 10 / FPS
-                if breath > 100:
-                    breath = 100
+                self.player.breath += 10 / FPS
+                if self.player.breath > 100:
+                    self.player.breath = 100
 
             self.screen.fill(Color("#004400"))
-            # x = y = 0
-            # for i in world_map:
-            #     for j in i:
-            #         pf = Surface((40, 40))
-            #         if j == '1':
-            #             pf.blit(bricks, (0, 0))
-            #         elif j == '2':
-            #             pf.blit(bricks3, (0, 0))
-            #         else:
-            #             pf.blit(bricks2, (0, 0))
-            #         self.screen.blit(pf, (x, y))
-            #         x += 40
-            #     y += 40
-            #     x = 0
-            self.entity.update(self.clock.get_time(), self.player, enemy)
-            #camera.update(self.player)
-            for i in self.entity:
-                camera.apply(i)
-            for i in map_sprite:
-                camera.apply(i)
+            self.entity.update(self.clock.get_time(), self.player, enemy, score)
             map_sprite.draw(self.screen)
             self.entity.draw(self.screen)
-            for lm in light.get_effect():
-                draw.lines(self.screen, light.color, False,
-                           list(map(lambda m: (
-                               self.player.x + m[0] * (-1 if self.player.flip else 1) + (
-                                   40 if self.player.flip else 40),
-                               self.player.y + self.player.z + m[1] + 30), lm)),
-                           width=1)
+            if self.player.attacking:
+                for lm in light.get_effect():
+                    draw.lines(self.screen, light.color, False,
+                               list(map(lambda m: (
+                                   self.player.x + m[0] * (-1 if self.player.flip else 1) + (
+                                       40 if self.player.flip else 40),
+                                   self.player.y + self.player.z + m[1] + 30), lm)),
+                               width=1)
             self.screen.blit(bar_empty, (20, 20))
-            t = Surface((breath, 40))
+            t = Surface((self.player.breath, 40))
             t.blit(bar_full, (0, 0))
             self.screen.blit(t, (20, 20))
+            draw.rect(self.screen, Color("red"),
+                      Rect(WIN_WIDTH - health.get_width() + 5, 26, (health.get_width() - 27) / 100 * self.player.lives,
+                           health.get_height() - 10))
+            self.screen.blit(health, (WIN_WIDTH - health.get_width() - 20, 20))
+            sc = pygame.transform.scale(self.screen, (604, 463))
+            self.screen.fill(Color(0, 0, 0))
+            self.screen.blit(sc, (WIN_WIDTH / 2 - sc.get_width() / 2, WIN_HEIGHT / 2 - sc.get_height() / 2))
+            if self.player.lives <= 0:
+                return score + self.player.lives - sum(
+                    map(lambda it: it.lives, self.entity.sprites())) - 100 + self.player.lives
+            if len(self.entity.sprites()) == 1:
+                return score + self.player.lives - sum(
+                    map(lambda it: it.lives, self.entity.sprites())) - 100 + self.player.lives
             pygame.display.flip()
             self.clock.tick(FPS)
-
-        pygame.quit()
